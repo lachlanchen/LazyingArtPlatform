@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use LazyingArtPlatform, please cite this repository."
+type: software
+title: "LazyingArtPlatform: A lightweight product hub"
+version: 0.1.0
+date-released: 2026-09-27
+abstract: "A small static hub connecting LazyingArt products, app stores, existing checkout and community."
+authors:
+  - family-names: Chen
+    given-names: Lachlan
+    alias: lachlanchen
+repository-code: "https://github.com/lachlanchen/LazyingArtPlatform"
+url: "https://platform.lazying.art/"
+keywords:
+  - static website
+  - product hub
+  - lazying-art
