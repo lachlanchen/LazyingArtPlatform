@@ -14,6 +14,13 @@ test('physical selection goes through the existing shop', () => {
   for (const slug of ['notebook', 'panda', 'pendant']) assert.ok(html.includes(`https://buy.lazying.art/#${slug}`));
   assert.doesNotMatch(html, /buy\.stripe\.com/);
 });
+test('new products lead to useful introductions without claiming store approval', () => {
+  const section = html.match(/<section[^>]+id="explore"[\s\S]*?<\/section>/)[0];
+  for (const id of ['3862', '3864', '3866']) assert.ok(section.includes(`/computer_internet/${id}/`));
+  assert.match(section, /testing or review/);
+  assert.doesNotMatch(section, /apps\.apple\.com|play\.google\.com/);
+  for (const id of ['3849', '3853', '3857', '3867']) assert.ok(html.includes(`/${id}/`));
+});
 test('EchoMind uses official released stores and the existing first-party chat', () => {
   for (const route of ['https://chat.lazying.art/', 'id6793615455', 'art.lazying.echomind']) assert.ok(html.includes(route));
   assert.match(html, /iPhone\/iPad: US\$0\.99/);
