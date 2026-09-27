@@ -219,6 +219,8 @@ def render_summary(data, identity):
         out.append('<p>'+message+'</p>')
     else:
         chain = data['on_chain']
+        if data['wallet']['state'] == 'linked':
+            out.append('<p class="small">Linked wallet: <code>'+html.escape(data['wallet']['address'])+'</code></p>')
         if chain['state'] == 'available':
             out.append('<p>Wallet balance: <strong>'+format_units(chain['lac_units'])+' LAC</strong></p>')
             out.append('<p>ETH for gas: '+format_units(chain['eth_wei'])+' ETH. Latest block observation, not final settlement.</p>')
@@ -237,5 +239,6 @@ def render_summary(data, identity):
             out.append('</ul>')
         if data['grants']['has_more']:
             out.append('<p>Showing the newest 20 grants; totals include all your grants.</p>')
+    out.append('<p class="small">Observed '+html.escape(data['observed_at'])+'</p>')
     out.append('<p><a href="https://coin.lazying.art/">Open Coin</a></p></section>')
     return ''.join(out)

@@ -1,5 +1,5 @@
 # Adapted from the owner's LazyingArtCoin account consumer at b3e7ebf.
-# Profile-only Platform preparation; no Coin ledger or provider authority.
+# Platform consumer; no Coin ledger or provider authority.
 """Protected, app-local web sessions for the opt-in central account adapter."""
 
 import asyncio
@@ -125,9 +125,9 @@ class AccountSessions:
             self._locks[key] = lock
         return lock
 
-    async def start(self):
+    async def start(self, *, coin=False):
         found = await self.client.discover(require_introspection=True)
-        attempt, url = self.client.begin(found)
+        attempt, url = self.client.begin(found, coin=coin)
         browser = secrets.token_urlsafe(32)
         await asyncio.to_thread(self.persistence.save_attempt, attempt, browser)
         return browser, url
@@ -147,30 +147,71 @@ class AccountSessions:
 
     async def identity(self, opaque):
         async with self.lock(opaque):
-            row, tokens = await asyncio.to_thread(self.persistence.read, opaque)
-            if tokens.expires_at - self.client.clock() <= 30:
-                await asyncio.to_thread(self.persistence.claim_refresh, opaque, row['payload'])
-                refreshed = None
-                try:
-                    tokens = refreshed = await self.client.refresh(tokens)
-                    await asyncio.to_thread(self.persistence.finish_refresh, opaque, tokens)
-                except BaseException:
-                    await asyncio.to_thread(self.persistence.invalidate, opaque)
-                    if refreshed:
-                        try:
-                            await self.client.revoke(refreshed)
-                        except AccountError:
-                            pass
-                    raise
-            try:
-                evidence = await self.client.introspect(tokens)
-                if (evidence.identity.issuer, evidence.identity.subject) != (row['issuer'], row['subject']):
-                    raise AccountError('invalid_account_identity')
-            except AccountError as exc:
-                if str(exc) in ('account_authorization_required', 'invalid_account_identity'):
-                    await asyncio.to_thread(self.persistence.invalidate, opaque)
-                raise
+            evidence, _ = await self._validated(opaque)
             return evidence
+
+    async def _validated(self, opaque):
+        """Caller holds the process lock; durable CAS still protects other workers."""
+        row, tokens = await asyncio.to_thread(self.persistence.read, opaque)
+        if tokens.expires_at - self.client.clock() <= 30:
+            await asyncio.to_thread(self.persistence.claim_refresh, opaque, row['payload'])
+            refreshed = None
+            try:
+                tokens = refreshed = await self.client.refresh(tokens)
+                await asyncio.to_thread(self.persistence.finish_refresh, opaque, tokens)
+            except BaseException:
+                await asyncio.to_thread(self.persistence.invalidate, opaque)
+                if refreshed:
+                    try:
+                        await self.client.revoke(refreshed)
+                    except AccountError:
+                        pass
+                raise
+        try:
+            evidence = await self.client.introspect(tokens)
+            if (evidence.identity.issuer, evidence.identity.subject) != (row['issuer'], row['subject']):
+                raise AccountError('invalid_account_identity')
+            # Logout in another worker while introspection was in flight wins.
+            _, current_tokens = await asyncio.to_thread(self.persistence.read, opaque)
+            if current_tokens != tokens:
+                raise AccountError('account_refresh_in_progress')
+        except AccountError as exc:
+            if str(exc) in ('account_authorization_required', 'invalid_account_identity'):
+                await asyncio.to_thread(self.persistence.invalidate, opaque)
+            raise
+        return evidence, tokens
+
+    async def coin_summary(self, opaque, reader, expected_identity):
+        """Read-only, no cached credential or response; reject late/stale responses."""
+        from server.coin_client import CoinError, validate_summary
+        from server.account_client import COIN_SCOPE
+        async with self.lock(opaque):
+            evidence, tokens = await self._validated(opaque)
+            if evidence.identity != expected_identity:
+                raise AccountError('invalid_account_identity')
+            try:
+                found = await self.client.discover(require_introspection=True)
+            except AccountError:
+                return {'state':'temporarily_unavailable','summary':None}
+            if not found.coin_read:
+                return {'state':'not_connected','summary':None}
+            if evidence.scope != COIN_SCOPE:
+                return {'state':'permission_required','summary':None}
+            try:
+                delegated = await self.client.exchange_coin(tokens, evidence.identity)
+                summary = await reader.read(delegated, evidence.identity)
+                validate_summary(summary, evidence.identity)
+                result = {'state':'available','summary':summary}
+            except CoinError as exc:
+                state = str(exc) if str(exc) in ('permission_required','authorization_required',
+                    'not_connected','rate_limited','temporarily_unavailable') else 'temporarily_unavailable'
+                result = {'state':state,'summary':None}
+            current, _ = await self._validated(opaque)
+            if current.identity != evidence.identity:
+                raise AccountError('invalid_account_identity')
+            if current.scope != COIN_SCOPE:
+                return {'state':'permission_required','summary':None}
+            return result
 
     async def logout(self, opaque):
         async with self.lock(opaque):

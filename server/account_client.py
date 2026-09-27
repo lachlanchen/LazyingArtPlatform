@@ -1,8 +1,8 @@
 # Adapted from the owner's LazyingArtCoin account consumer at b3e7ebf.
-# Profile-only Platform preparation; no Coin ledger or provider authority.
+# Platform consumer; no Coin ledger or provider authority.
 """Backend client for LazyingArt account contract v1 (OAuth, not OIDC).
 
-Not imported by the production companion. Configuration and browser/native
+Not enabled on the public hub yet. Configuration and browser
 callback registration must be supplied by the central account owner. No
 provider password, ID token, wallet authority or credit grant is handled here.
 """
@@ -20,6 +20,18 @@ from dataclasses import dataclass, field
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 import tornado.httpclient
+
+COIN_SCOPE = 'profile coin.summary.read'
+EXCHANGE_GRANT = 'urn:ietf:params:oauth:grant-type:token-exchange'
+ACCESS_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:access_token'
+COIN_DELEGATION = {
+    'contract':'platform-coin-read-v1', 'delegation_version':1,
+    'actor_client_id':'lazyingart-platform-web',
+    'source_audience':'lazyingart-platform-api', 'audience':'lazyartcoin-read-api',
+    'scope':'coin.summary.read', 'resource_client_id':'lazyartcoin-read-resource',
+    'max_token_lifetime_seconds':300, 'max_future_iat_skew_seconds':30,
+    'refresh_supported':False, 'chained_delegation_supported':False,
+}
 
 
 class AccountError(ValueError):
@@ -70,6 +82,7 @@ class ClientConfiguration:
 class Discovery:
     issuer: str
     providers: tuple[str, ...]
+    coin_read: bool = False
 
 
 @dataclass
@@ -82,6 +95,7 @@ class AuthorizationAttempt:
     verifier: str = field(repr=False)
     expires_at: float
     consumed: bool = False
+    scope: str = 'profile'
 
 
 @dataclass(frozen=True)
@@ -89,6 +103,7 @@ class Credentials:
     access_token: str = field(repr=False)
     refresh_token: str = field(repr=False)
     expires_at: float
+    scope: str = 'profile'
 
 
 @dataclass(frozen=True)
@@ -104,6 +119,7 @@ class IdentityEvidence:
     identity: Identity
     email_verified: bool
     auth_time: int
+    scope: str = 'profile'
 
 
 def pkce_challenge(verifier: str) -> str:
@@ -188,19 +204,34 @@ class AccountClient:
         flags = data.get("providers")
         if not isinstance(flags, dict) or any(type(flags.get(p)) is not bool for p in ("password", "google", "apple", "github")):
             raise AccountError("invalid_provider_discovery")
-        return Discovery(self.config.issuer, tuple(p for p in ("password", "google", "apple", "github") if flags[p]))
+        # Coin is a separate opt-in capability, never inferred from profile login.
+        delegation = data.get('resource_delegations')
+        coin_read = (self.config.client_id == 'lazyingart-platform-web'
+            and self.config.audience == 'lazyingart-platform-api'
+            and isinstance(data.get('adapter_contracts'), list)
+            and 'platform-coin-read-v1' in data['adapter_contracts']
+            and EXCHANGE_GRANT in data['grant_types_supported']
+            and 'coin.summary.read' in data['scopes_supported']
+            and isinstance(delegation, list) and len(delegation) == 1
+            and isinstance(delegation[0], dict)
+            and delegation[0] == COIN_DELEGATION
+            and all(type(delegation[0].get(k)) is type(v) for k,v in COIN_DELEGATION.items()))
+        return Discovery(self.config.issuer, tuple(p for p in ("password", "google", "apple", "github") if flags[p]), coin_read)
 
-    def begin(self, discovery: Discovery) -> tuple[AuthorizationAttempt, str]:
+    def begin(self, discovery: Discovery, *, coin=False) -> tuple[AuthorizationAttempt, str]:
         if discovery.issuer != self.config.issuer:
             raise AccountError("issuer_mismatch")
+        if coin and not discovery.coin_read:
+            raise AccountError('coin_not_connected')
         attempt = AuthorizationAttempt(
             self.config.issuer, self.config.client_id, self.config.audience,
             self.config.redirect_uri, secrets.token_urlsafe(32), secrets.token_urlsafe(48),
             self.clock() + 600,
+            scope=COIN_SCOPE if coin else 'profile',
         )
         query = {"response_type": "code", "client_id": self.config.client_id,
                  "audience": self.config.audience, "redirect_uri": self.config.redirect_uri,
-                 "scope": "profile", "state": attempt.state,
+                 "scope": attempt.scope, "state": attempt.state,
                  "code_challenge": pkce_challenge(attempt.verifier), "code_challenge_method": "S256"}
         return attempt, self.config.issuer + "/account/authorize?" + urlencode(query)
 
@@ -212,6 +243,8 @@ class AccountClient:
         if (attempt.issuer, attempt.client_id, attempt.audience, attempt.redirect_uri) != (
                 self.config.issuer, self.config.client_id, self.config.audience, self.config.redirect_uri):
             raise AccountError("authorization_attempt_mismatch")
+        if attempt.scope not in ('profile', COIN_SCOPE):
+            raise AccountError('authorization_attempt_mismatch')
         if (not isinstance(callback_url, str) or len(callback_url) > 8192
                 or re.search(r"[\s\\\x00-\x1f]", callback_url)):
             raise AccountError("invalid_callback")
@@ -235,13 +268,14 @@ class AccountClient:
         return self._tokens(await self._request("/account/token", {
             **self.config.credentials(), "grant_type": "authorization_code", "code": code,
             "redirect_uri": self.config.redirect_uri, "code_verifier": attempt.verifier,
-        }))
+        }), expected_scope=attempt.scope)
 
-    def _tokens(self, result: dict) -> Credentials:
+    def _tokens(self, result: dict, *, expected_scope='profile', allow_reduced_scope=False) -> Credentials:
         ttl = result.get("expires_in")
-        if result.get("token_type") != "Bearer" or result.get("scope") != "profile" or type(ttl) is not int or not 0 < ttl <= 600:
+        allowed = {expected_scope, 'profile'} if allow_reduced_scope else {expected_scope}
+        if expected_scope not in ('profile', COIN_SCOPE) or result.get("token_type") != "Bearer" or not isinstance(result.get('scope'),str) or result.get("scope") not in allowed or type(ttl) is not int or not 0 < ttl <= 600:
             raise AccountError("invalid_credential_response")
-        return Credentials(credential(result.get("access_token")), credential(result.get("refresh_token")), self.clock() + ttl)
+        return Credentials(credential(result.get("access_token")), credential(result.get("refresh_token")), self.clock() + ttl, result['scope'])
 
     async def profile(self, tokens: Credentials) -> Identity:
         if self.clock() >= tokens.expires_at:
@@ -258,7 +292,7 @@ class AccountClient:
         # Deliberately no transport retry: the issuer revokes a family on reuse.
         return self._tokens(await self._request("/account/token", {
             **self.config.credentials(), "grant_type": "refresh_token", "refresh_token": credential(tokens.refresh_token),
-        }))
+        }), expected_scope=tokens.scope, allow_reduced_scope=True)
 
     async def revoke(self, tokens: Credentials) -> None:
         result = await self._request("/account/revoke", {**self.config.credentials(), "token": credential(tokens.refresh_token)})
@@ -283,7 +317,9 @@ class AccountClient:
         now = self.clock()
         if (data.get('active') is not True or data.get('iss') != self.config.issuer
                 or data.get('client_id') != self.config.client_id or data.get('aud') != self.config.audience
-                or data.get('scope') != 'profile' or data.get('token_type') != 'Bearer'
+                or tokens.scope not in ('profile', COIN_SCOPE)
+                or not isinstance(data.get('scope'),str)
+                or data.get('scope') not in {tokens.scope, 'profile'} or data.get('token_type') != 'Bearer'
                 or any(type(data.get(k)) is not int for k in ('iat', 'exp', 'auth_time'))
                 or not 0 < data['auth_time'] <= data['iat'] <= now + 30
                 or not now < data['exp'] <= data['iat'] + 600
@@ -295,7 +331,51 @@ class AccountClient:
                 or data.get('verified_legacy_identities') != []):
             raise AccountError('invalid_account_identity')
         return IdentityEvidence(Identity(self.config.issuer, data['sub'], account['display_name'], self.config.client_id),
-                                account['email_verified'], data['auth_time'])
+                                account['email_verified'], data['auth_time'], data['scope'])
+
+    async def exchange_coin(self, tokens, identity):
+        """Exact accepted delegation contract; requires live discovery and consent."""
+        from server.coin_client import CoinError, ReadCredential
+        if tokens.scope != COIN_SCOPE or identity.issuer != self.config.issuer or identity.client_id != self.config.client_id:
+            raise CoinError('permission_required')
+        try:
+            found = await self.discover(require_introspection=True)
+        except AccountError:
+            raise CoinError('temporarily_unavailable') from None
+        if not found.coin_read:
+            raise CoinError('not_connected')
+        started = int(self.clock())
+        if tokens.expires_at <= started:
+            raise AccountError('account_authorization_required')
+        body = urlencode(dict(grant_type=EXCHANGE_GRANT,
+            client_id=self.config.client_id, client_secret=self.config.client_secret,
+            subject_token=credential(tokens.access_token), subject_token_type=ACCESS_TOKEN_TYPE,
+            requested_token_type=ACCESS_TOKEN_TYPE, audience='lazyartcoin-read-api', scope='coin.summary.read'))
+        try:
+            response = await self.http.fetch(self.config.issuer+'/account/token', method='POST',
+                headers={'Accept':'application/json','Content-Type':'application/x-www-form-urlencoded'},
+                body=body, follow_redirects=False, validate_cert=True, request_timeout=15,
+                connect_timeout=5, raise_error=False)
+        except (tornado.httpclient.HTTPClientError, OSError, asyncio.TimeoutError):
+            raise CoinError('temporarily_unavailable') from None
+        if response.code != 200:
+            # Invalid scope/grant needs consent or reconnect, never another token route.
+            raise CoinError({400:'permission_required',404:'not_connected',429:'rate_limited'}.get(response.code,'temporarily_unavailable'))
+        try:
+            if len(response.body) > 65536 or response.headers.get('Content-Type','').split(';')[0].strip() != 'application/json':
+                raise ValueError()
+            data = json.loads(response.body)
+            ttl = data.get('expires_in')
+            if (set(data) != {'access_token','issued_token_type','token_type','expires_in','scope'}
+                    or data['issued_token_type'] != ACCESS_TOKEN_TYPE or data['token_type'] != 'Bearer'
+                    or data['scope'] != 'coin.summary.read' or type(ttl) is not int or not 0 < ttl <= 300):
+                raise ValueError()
+            result = ReadCredential(identity.issuer, identity.subject, credential(data['access_token']),
+                started, min(started+ttl, int(tokens.expires_at)))
+            result.validate(identity, self.clock())
+        except (ValueError, TypeError, AttributeError, KeyError):
+            raise CoinError('invalid_summary') from None
+        return result
 
 
 class RefreshCoordinator:

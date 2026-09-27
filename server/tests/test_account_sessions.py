@@ -19,7 +19,7 @@ def setup(tmp_path):
     config = ClientConfiguration('https://accounts.example.test', 'platform-web', 'platform-api',
                                 'https://platform.lazying.art/api/account/callback', 'synthetic-client-secret')
     client = SimpleNamespace(config=config, clock=lambda: now[0])
-    client.begin = lambda discovery: AccountClient.begin(client, discovery)
+    client.begin = lambda discovery, **kwargs: AccountClient.begin(client, discovery, **kwargs)
     client.discover = AsyncMock(return_value=Discovery(config.issuer, ('password',)))
     identity = Identity(config.issuer, 'la_' + 'a' * 32, 'Member', config.client_id)
     evidence = IdentityEvidence(identity, True, 900)

@@ -26,6 +26,12 @@ class DisabledTests(AsyncHTTPTestCase):
     def test_foreign_host_rejected(self):
         assert self.fetch('/api/account/config',headers={'Host':'evil.example'}).code == 400
 
+    def test_disabled_page_has_no_login_or_balance_fabrication(self):
+        response=self.fetch('/account',headers={'Host':'platform.lazying.art'})
+        assert response.code==200 and b'not available here yet' in response.body
+        assert b'<form' not in response.body and b'0 LAC' not in response.body
+        assert response.headers['X-Robots-Tag']=='noindex, nofollow'
+
 
 class AdapterTests(AsyncHTTPTestCase):
     def get_app(self):
@@ -53,7 +59,7 @@ class AdapterTests(AsyncHTTPTestCase):
     def test_chooser_does_not_implement_provider_password_forms(self):
         response = self.request('/account')
         text = response.body.decode()
-        assert 'Google, Apple, GitHub' in text
+        assert 'Google · Apple · GitHub' in text
         assert 'type="password"' not in text and 'provider/' not in text
         assert '/api/account/start' in text
         assert self.request('/api/account/start').code == 405
@@ -112,3 +118,64 @@ class AdapterTests(AsyncHTTPTestCase):
         assert response.code==200
         assert json.loads(response.body)==dict(signed_out=True,central_revocation_confirmed=False)
         assert '__Host-lap_session=' in response.headers['Set-Cookie']
+
+    def test_expired_cookie_gets_a_sign_in_path(self):
+        self.service.identity.side_effect=AccountError('account_reconnect_required')
+        response=self.request('/account',headers={'Cookie':'__Host-lap_session='+'s'*48})
+        assert response.code==303 and response.headers['Location']=='/account?result=retry'
+        assert '__Host-lap_session=' in response.headers['Set-Cookie']
+
+    def test_browser_logout_returns_to_account(self):
+        cookie,token=self.csrf()
+        self.service.logout.return_value=False
+        response=self.request('/api/account/logout',method='POST',
+            body=urlencode({'_xsrf':token,'return_to':'account'}),
+            headers={'Origin':ORIGIN,'Cookie':cookie+'; __Host-lap_session='+'s'*48})
+        assert response.code==303 and response.headers['Location']=='/account?result=signed-out-local'
+
+
+class CoinDashboardTests(AdapterTests):
+    def get_app(self):
+        super().get_app()
+        from test_coin_client import sample
+        self.summary=sample()
+        self.summary['account']['issuer']=ISSUER
+        self.service.coin_summary=AsyncMock(return_value={'state':'available','summary':self.summary})
+        self.reader=object()
+        return application(self.service,cookie_secret='synthetic-test-cookie-secret-only',coin_reader=self.reader)
+
+    def test_display_name_escaped_and_missing_coin_not_zero(self):
+        response=self.request('/account',headers={'Cookie':'__Host-lap_session='+'s'*48})
+        assert b'<script>private</script>' not in response.body
+        assert b'500 LAC' in response.body and b'1,500 LAC' not in response.body
+        assert b'Historical receipts are not an additional spendable balance.' in response.body
+        response=self.request('/api/account/me',headers={'Cookie':'__Host-lap_session='+'s'*48})
+        assert json.loads(response.body)['coin']['state']=='available'
+
+    def test_read_endpoint_uses_session_not_subject_parameter(self):
+        response=self.request('/api/account/coin?subject=other',headers={'Cookie':'__Host-lap_session='+'s'*48})
+        assert response.code==400
+        self.service.coin_summary.assert_not_awaited()
+        response=self.request('/api/account/coin',headers={'Cookie':'__Host-lap_session='+'s'*48})
+        assert response.code==200 and response.headers['Cache-Control']=='no-store'
+        assert self.service.coin_summary.await_args.args[0]=='s'*48
+
+    def test_connect_is_authenticated_explicit_and_csrf_protected(self):
+        cookie,token=self.csrf()
+        assert self.request('/api/account/coin/connect').code==405
+        assert self.request('/api/account/coin/connect',method='POST',body='',headers={'Origin':ORIGIN}).code==403
+        response=self.request('/api/account/coin/connect',method='POST',body=urlencode({'_xsrf':token}),
+            headers={'Origin':ORIGIN,'Cookie':cookie+'; __Host-lap_session='+'s'*48})
+        assert response.code==303
+        self.service.start.assert_awaited_once_with(coin=True)
+
+    def test_no_permission_shows_read_only_choice_not_quantity(self):
+        self.service.coin_summary.return_value={'state':'permission_required','summary':None}
+        response=self.request('/account',headers={'Cookie':'__Host-lap_session='+'s'*48})
+        assert b'Choose Coin read access' in response.body and b'500 LAC' not in response.body
+        assert b'move coins or grant spending rights' in response.body
+
+    def test_account_revoked_after_coin_io_does_not_return_snapshot(self):
+        self.service.coin_summary.side_effect=AccountError('account_authorization_required')
+        response=self.request('/api/account/coin',headers={'Cookie':'__Host-lap_session='+'s'*48})
+        assert response.code==401 and b'500' not in response.body

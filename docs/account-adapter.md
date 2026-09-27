@@ -1,4 +1,4 @@
-# Shared account consumer — preparation, not live login
+# Shared account and personal dashboard — not live yet
 
 The public hub remains available without signing in. EchoMind owns the shared
 account and its Google, Apple, GitHub and email flows. This repository owns only
@@ -11,12 +11,18 @@ Coin authority, or access to any sibling database. Third-party dependencies
 retain their own licenses. The new app-local SQLite file contains hashed
 browser credentials and encrypted upstream credentials, not provider passwords.
 
-The unmounted `server/http.py` adapter supports configuration discovery,
-central sign-in/registration redirection, one-use PKCE callback, minimal profile
-and CSRF-protected logout. It exposes no wallet signing, payment, Coin write,
-legacy-ID linking or admin routes. Coin values remain null/not_connected in
-the HTTP adapter. A separately scoped, subject-bound Coin resource contract
-now exists in source, but central delegation and live qualification are pending.
+The unmounted `server/http.py` adapter now implements the account page,
+central sign-in/registration redirection, one-use PKCE callback, minimal profile,
+separate Coin consent and CSRF-protected logout. The signed-in dashboard shows
+the account name, optional LAC summary and app shortcuts. It exposes no wallet
+signing, payment, Coin write, legacy-ID linking or admin routes. Actual central
+deployment, registration and live callback qualification remain pending.
+
+Routes: `/account`, `/api/account/config`, `/api/account/start`,
+`/api/account/callback`, `/api/account/me`, `/api/account/coin`,
+`/api/account/coin/connect`, `/api/account/logout`. The internal `/healthz`
+is independent of account traffic limits. App shortcuts are links, not a claim
+of synchronized workspaces, purchases, EchoMind access or credits.
 
 ## Before activation
 
@@ -26,10 +32,12 @@ now exists in source, but central delegation and live qualification are pending.
    The central source and mocked callbacks alone are insufficient.
 3. Install a private app-owned state directory, distinct app secret/encryption
    key, explicit schema, and the pinned minimal dependencies in isolation.
-4. Add a protected runtime loader and isolated loopback service with size/rate/
-   resource limits, deployment and rollback tests; none is deployed today.
+4. Deploy and qualify the protected runtime loader and isolated loopback
+   service, size/rate/resource limits, exact ingress routes and rollback.
+   The loader is implemented; none is deployed today.
 5. Qualify the real provider callbacks, cancellation, logout, revocation and
-   outages through the exact HTTPS origin. Only then expose Sign in on the hub.
+   outages through the exact HTTPS origin. Only then expose Sign in on the hub
+   and update its currently static-only privacy text.
 6. Separately qualify Coin delegation before showing balances or grants. Never
    send a Platform-audience token to Coin or trust a caller-supplied subject.
 
@@ -50,13 +58,20 @@ refresh concurrency and crash barriers. They do not contact real providers or
 establish a production sign-in. Dependencies are pinned for future isolated
 qualification; do not modify another project's environment to install them.
 
-## Personal Coin summary preparation
+## Personal Coin summary
 
 `server/coin_client.py` implements the resource side of
-[Coin summary v1](https://github.com/lachlanchen/LazyingArtCoin/blob/40c78b3108bfebbd256646891d50ce42135f06b1/docs/integrations/COIN-SUMMARY-V1.md).
-It is not mounted by the HTTP application. The central owner must still accept
-and implement the delegated authorization exchange; this consumer does not
-invent that endpoint or mint a token.
+[Coin summary v1](https://github.com/lachlanchen/LazyingArtCoin/blob/65739f4fd2cf26fafa0811428ad75def0a6418f8/docs/integrations/COIN-SUMMARY-V1.md).
+It is wired into the HTTP application only when explicitly enabled by the
+private runtime. Central has accepted the `platform-coin-read-v1` contract;
+production implementation and activation evidence remain pending. The consumer
+does not invent an issuer endpoint or mint a token.
+
+Ordinary login asks only for `profile`. A separate explicit consent request asks
+for `profile coin.summary.read`. The accepted form-encoded exchange uses the
+[RFC 8693 token-exchange grant](https://www.rfc-editor.org/rfc/rfc8693.html)
+to obtain a short-lived Coin-audience credential. Exact discovery metadata and
+scope checks prevent treating a profile-only login as Coin permission.
 
 - Fixed HTTPS GET resource, dedicated delegated-token header, no redirects,
   cookies, arbitrary subject selector, legacy bearer, retry or write operation.
@@ -68,11 +83,42 @@ invent that endpoint or mint a token.
 - Escaped server-rendered summary; no personal identifiers are logged.
 
 The `ReadCredential` type is a defensive envelope, not proof that authorization
-exists. Only a qualified central adapter may populate it. Before mounting this
-view, bind acquisition and response to the app-local session, revalidate after
-the read, discard responses after logout/account switching, and qualify actual
-consent/revocation and resource-header forwarding. Do not cache personal reads.
+exists. Only the central adapter may populate it from the accepted exchange.
+Acquisition and response are bound to the app-local session. Authoritative
+checks before and after I/O discard responses after logout, account changes or
+consent revocation. Real consent/revocation and public resource-header forwarding
+still require production qualification. Personal reads are not cached.
 
-123 Python tests pass, including 47 synthetic Coin-consumer cases. They prove
-source behavior, not a live provider login, issued delegation or customer
-balance. No sample quantities appear in the public product hub.
+## Private runtime
+
+`server/runtime.py` accepts explicit owner-private regular configuration and
+secret files, rejects shared/symlinked credentials, and requires an independent
+encryption key and cookie secret. Private SQLite schema installation is explicit;
+disabled mode needs no credentials or database. No issuer is guessed.
+
+The runtime binds only to loopback, trusts no forwarded visitor IP and limits
+headers and bodies to 16 KiB. The per-process request budget allows 16 active
+account requests and a 60-request burst, refilling at two per second. Production
+edge/service resource limits are qualified separately. Central and Coin requests
+have bounded timeouts and no automatic token-exchange retries.
+
+```bash
+python -m server.runtime --config /private/runtime.json --state-dir /private/state --install-schema
+python -m server.runtime --config /private/runtime.json --state-dir /private/state --check
+python -m server.runtime --config /private/runtime.json --state-dir /private/state
+```
+
+These paths are placeholders. Actual credential locations and service topology
+stay in private handoffs. Caddy keeps ownership of TLS and the explicit public
+route allowlist. Never serve the repository root or private runtime configuration.
+
+Pages and APIs use no-store/noindex, host-only Secure/HttpOnly cookies, strict
+Host/Origin and CSRF checks, a script-free CSP and escaped display text. Request
+access logs are disabled to avoid storing callback codes or personal identifiers.
+
+The complete local flow test exercises real Platform handlers and encrypted
+state with a synthetic issuer/resource: sign-in, separate consent, LAC summary,
+callback replay, cancellation and logout. Browser layout review covers sign-in,
+disabled, permission and populated states at 320, 390 and 1280 pixels. These
+prove source/layout behavior, not a production provider login or customer funds.
+No sample quantities appear in the public product hub.
