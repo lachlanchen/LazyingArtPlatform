@@ -8,6 +8,7 @@ render is substituted for the notebook photograph.
 | `public/assets/landn.png` | lachlanchen/L-and-N — `store/assets/google-play-icon.png` |
 | `public/assets/bunko.png` | lachlanchen/Bunko — `public/icon-192.png` |
 | `public/assets/brand.png` | lachlanchen/Figurine — `website/assets/brand/lazyingart-icon.png` |
+| `public/assets/echomind.png` | EchoMind release assets — `EchoMind/store/assets/icons/apple-app-icon-1024.png`; SHA-256 `63099b94c520293edd2408b340aa23671a38625453a62caf59b1d97acb75cde4` |
 | `public/assets/notebook.webp` | lachlanchen/Figurine — `website/assets/products/patchwork-leather-notebook/colorful-patchwork-leather-notebook-front-01.webp` |
 
 The notebook photograph was visually inspected on 2026-09-27. Source-project

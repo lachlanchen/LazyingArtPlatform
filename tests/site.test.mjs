@@ -25,6 +25,17 @@ test('coin remains optional and inactive', () => {
   assert.match(html, /purchase does not earn an award/);
   assert.doesNotMatch(html, /connectWallet|eth_sendTransaction|claim now|guaranteed income/i);
 });
+test('company brand, prominent EchoMind actions and accessible motion', () => {
+  assert.doesNotMatch(html, /Lachlan Chen|by Lachlan|I make small tools/);
+  assert.ok((html.match(/https:\/\/chat\.lazying\.art\//g) || []).length >= 3);
+  assert.ok(html.includes('Get the iPhone app'));
+  assert.ok(html.includes('/assets/echomind.png'));
+  const css = readFileSync(root + 'styles.css', 'utf8');
+  assert.ok(css.includes('prefers-reduced-motion: reduce'));
+  assert.ok(css.includes('animation: none !important'));
+  assert.ok(css.includes('@keyframes arrive'));
+  assert.doesNotMatch(css, /infinite/);
+});
 test('no forms, trackers, scripts, secrets or browser credential storage', () => {
   for (const file of readdirSync(root).filter(f => f.endsWith('.html'))) {
     const text = readFileSync(root + file, 'utf8');
