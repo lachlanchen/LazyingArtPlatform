@@ -60,6 +60,15 @@ test('no forms, trackers, scripts, secrets or browser credential storage', () =>
     assert.doesNotMatch(text, /<script|<form|<iframe|localStorage|sk_live_|sk_test_|127\.0\.0\.1|\/home\/lachlan/i);
   }
 });
+test('privacy distinguishes optional sessions from anonymous browsing', () => {
+  const privacy = readFileSync(root + 'privacy.html', 'utf8');
+  assert.match(privacy, /browse the products without an account/);
+  assert.match(privacy, /up to 30 days/);
+  assert.match(privacy, /encrypted on our server/);
+  assert.match(privacy, /does not sign you out of every other app/);
+  assert.match(privacy, /LAC summaries are not connected/);
+  assert.doesNotMatch(privacy, /does not.*ask for a login/);
+});
 test('local assets, anchors and canonical routes exist', () => {
   for (const file of readdirSync(root).filter(f => f.endsWith('.html'))) {
     const text = readFileSync(root + file, 'utf8');
