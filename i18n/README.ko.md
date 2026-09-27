@@ -42,13 +42,13 @@ node --test
 
 ## 상태와 범위
 
-첫 정적 버전이며 예정 주소는 https://platform.lazying.art/입니다. public/만 배포합니다. 계정 DB, 결제 키, 추적 스크립트, 공개 관리자 기능이 없습니다. 기존 Stripe 운영 흐름이 기준입니다. 호스팅과 구매 사이트에는 각자의 약관이 있으며 수익을 보장하지 않습니다.
+https://platform.lazying.art/의 제품 페이지는 정적이며 계정 없이 둘러볼 수 있습니다. 공개 파일은 `public/`만 제공합니다. 분리된 계정 서비스의 설정과 암호화된 세션 DB는 비공개로 유지합니다. 결제 키, 추적 스크립트, 공개 관리자 기능은 없습니다. 구매는 기존 Stripe 및 앱 스토어 절차를 따릅니다.
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
 ## 계정 통합
 
-EchoMind는 기존 채팅과 네이티브 앱으로 연결됩니다. `server/`의 계정 연동 코드는 로컬 테스트 단계이며 통합 로그인은 배포되지 않았습니다. 로그인 제공자와 개인 Coin 조회는 담당 서비스의 실제 검증이 필요합니다.
+`server/`는 사용자 이름 또는 이메일과 비밀번호로 EchoMind의 공통 계정 서비스에 연결합니다. 이 공통 로그인에는 Google, Apple, GitHub가 활성화되어 있지 않습니다. 각 앱은 자체 작업 공간과 구매 정보를 유지하며 Coin 조회에는 별도 동의와 검증이 필요합니다. 검증된 배포 상태는 계정 어댑터 문서에서 확인할 수 있습니다.
 
 [docs/account-adapter.md](../docs/account-adapter.md)
 

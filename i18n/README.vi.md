@@ -42,13 +42,13 @@ node --test
 
 ## Trạng thái và phạm vi
 
-Bản tĩnh đầu tiên; địa chỉ dự kiến: https://platform.lazying.art/. Chỉ triển khai public/. Không có cơ sở dữ liệu tài khoản, khóa thanh toán, mã theo dõi hay trang quản trị công khai. Quy trình Stripe hiện có vẫn là nguồn chính thức. Dịch vụ lưu trữ và nơi mua hàng có điều khoản riêng; đây không phải cam kết thu nhập.
+Các trang sản phẩm tại https://platform.lazying.art/ vẫn là trang tĩnh và không cần tài khoản. Chỉ phục vụ `public/` dưới dạng tệp công khai; dịch vụ tài khoản tách biệt giữ kín cấu hình và cơ sở dữ liệu phiên đã mã hóa. Không có khóa thanh toán, mã theo dõi hay trang quản trị công khai. Việc mua hàng vẫn theo quy trình Stripe và các cửa hàng ứng dụng hiện có.
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
 ## Tích hợp tài khoản
 
-EchoMind liên kết tới chat và ứng dụng gốc hiện có. `server/` chứa bộ kết nối đã kiểm thử cục bộ, chưa triển khai đăng nhập thống nhất. Nhà cung cấp và dữ liệu Coin riêng cần dịch vụ chủ quản xác nhận thực tế.
+`server/` kết nối cổng sản phẩm với dịch vụ tài khoản dùng chung của EchoMind bằng tên người dùng hoặc email và mật khẩu. Google, Apple và GitHub chưa được bật cho luồng này. Mỗi ứng dụng giữ không gian làm việc và giao dịch mua riêng; đọc dữ liệu Coin cần sự đồng ý và kiểm chứng riêng. Ghi chú bộ kết nối nêu trạng thái phát hành đã được xác minh.
 
 [docs/account-adapter.md](../docs/account-adapter.md)
 

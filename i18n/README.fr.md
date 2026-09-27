@@ -42,13 +42,13 @@ node --test
 
 ## État et périmètre
 
-Première version statique ; adresse prévue : https://platform.lazying.art/. Déployer seulement public/. Ni base de comptes, ni clés de paiement, ni suivi, ni administration publique. Le processus Stripe existant fait autorité. L’hébergement et les sites marchands ont leurs propres conditions ; aucun revenu n’est garanti.
+Les pages produits sur https://platform.lazying.art/ restent statiques et accessibles sans compte. Seul `public/` est servi comme fichiers publics ; le service de comptes isolé garde sa configuration et sa base de sessions chiffrée privées. Ni clés de paiement, ni suivi, ni administration publique. Les achats passent toujours par les processus existants de Stripe et des boutiques d’applications.
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
 ## Intégration des comptes
 
-EchoMind renvoie vers son chat et ses applications existantes. `server/` contient un adaptateur testé localement, pas une connexion unifiée déployée. Les fournisseurs et les lectures privées Coin attendent la qualification réelle de leurs services.
+`server/` relie le portail au service de comptes partagé d’EchoMind, avec un nom d’utilisateur ou une adresse e-mail et un mot de passe. Google, Apple et GitHub ne sont pas activés pour ce parcours. Chaque application conserve son espace et ses achats ; les lectures Coin nécessitent un consentement et une validation distincts. Les notes de l’adaptateur précisent l’état vérifié de la mise en ligne.
 
 [docs/account-adapter.md](../docs/account-adapter.md)
 

@@ -1,4 +1,10 @@
-# Shared account and personal dashboard — not live yet
+# Shared account and personal dashboard
+
+Release qualification is in progress. The isolated service and exact HTTPS
+routes are deployed, but the homepage sign-in entry is held until a real browser
+registration, callback, dashboard and logout pass. Password discovery is verified;
+an issuer-side browser form-policy failure is being resolved by its owner.
+Coin reads remain disabled on Platform.
 
 The public hub remains available without signing in. EchoMind owns the shared
 account and its Google, Apple, GitHub and email flows. This repository owns only
@@ -11,12 +17,14 @@ Coin authority, or access to any sibling database. Third-party dependencies
 retain their own licenses. The new app-local SQLite file contains hashed
 browser credentials and encrypted upstream credentials, not provider passwords.
 
-The unmounted `server/http.py` adapter now implements the account page,
+The `server/http.py` adapter implements the account page,
 central sign-in/registration redirection, one-use PKCE callback, minimal profile,
 separate Coin consent and CSRF-protected logout. The signed-in dashboard shows
 the account name, optional LAC summary and app shortcuts. It exposes no wallet
-signing, payment, Coin write, legacy-ID linking or admin routes. Actual central
-deployment, registration and live callback qualification remain pending.
+signing, payment, Coin write, legacy-ID linking or admin routes. Central's live
+issuer is `https://chat.lazying.art`; its registered Platform profile contract is
+qualified. Password is enabled; Google, Apple and GitHub remain disabled for
+this shared flow. Existing native app provider support is a separate matter.
 
 Routes: `/account`, `/api/account/config`, `/api/account/start`,
 `/api/account/callback`, `/api/account/me`, `/api/account/coin`,
@@ -24,7 +32,7 @@ Routes: `/account`, `/api/account/config`, `/api/account/start`,
 is independent of account traffic limits. App shortcuts are links, not a claim
 of synchronized workspaces, purchases, EchoMind access or credits.
 
-## Before activation
+## Activation acceptance
 
 1. Obtain the central owner's actual issuer and client registration, not an
    inferred URL. Agree the exact Platform callback and profile audience.
@@ -34,10 +42,12 @@ of synchronized workspaces, purchases, EchoMind access or credits.
    key, explicit schema, and the pinned minimal dependencies in isolation.
 4. Deploy and qualify the protected runtime loader and isolated loopback
    service, size/rate/resource limits, exact ingress routes and rollback.
-   The loader is implemented; none is deployed today.
+   The isolated service and exact routes are deployed. An owned-service outage
+   returns a bounded failure while static product pages remain available; service
+   restart recovery and a synthetic callback log-leak check pass.
 5. Qualify the real provider callbacks, cancellation, logout, revocation and
    outages through the exact HTTPS origin. Only then expose Sign in on the hub
-   and update its currently static-only privacy text.
+   and publish the prepared entry. Privacy already explains optional sessions.
 6. Separately qualify Coin delegation before showing balances or grants. Never
    send a Platform-audience token to Coin or trust a caller-supplied subject.
 
@@ -55,8 +65,8 @@ node --test
 
 Fixtures test PKCE, issuer/audience rejection, replay, encrypted durable state,
 refresh concurrency and crash barriers. They do not contact real providers or
-establish a production sign-in. Dependencies are pinned for future isolated
-qualification; do not modify another project's environment to install them.
+establish a production sign-in. Dependencies are pinned and installed in an
+isolated service environment; do not modify another project's environment.
 
 ## Personal Coin summary
 
@@ -64,7 +74,8 @@ qualification; do not modify another project's environment to install them.
 [Coin summary v1](https://github.com/lachlanchen/LazyingArtCoin/blob/65739f4fd2cf26fafa0811428ad75def0a6418f8/docs/integrations/COIN-SUMMARY-V1.md).
 It is wired into the HTTP application only when explicitly enabled by the
 private runtime. Central has accepted the `platform-coin-read-v1` contract;
-production implementation and activation evidence remain pending. The consumer
+the issuer's delegation is deployed, while Platform keeps the downstream read
+disabled until its own real session and the resource are jointly qualified. The consumer
 does not invent an issuer endpoint or mint a token.
 
 Ordinary login asks only for `profile`. A separate explicit consent request asks

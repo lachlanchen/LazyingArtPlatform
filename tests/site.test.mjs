@@ -32,14 +32,14 @@ test('coin remains optional and inactive', () => {
   assert.match(html, /purchase does not earn an award/);
   assert.doesNotMatch(html, /connectWallet|eth_sendTransaction|claim now|guaranteed income/i);
 });
-test('shared account introduction distinguishes the framework from live EchoMind login', () => {
+test('shared account entry describes only the qualified password method', () => {
   const section = html.match(/<section[^>]+id="account"[\s\S]*?<\/section>/)[0];
-  assert.match(section, /Coming next/);
-  assert.match(section, /EchoMind account/);
-  for (const provider of ['Google', 'Apple', 'GitHub', 'email']) assert.ok(section.includes(provider));
-  assert.match(section, /Shared sign-in is not available on this hub yet/);
-  assert.match(section, /each app’s existing login/);
-  assert.match(section, /href="https:\/\/chat\.lazying\.art\/login"/);
+  assert.match(section, /username or email and password/);
+  assert.match(section, /no invitation needed/);
+  assert.match(section, /Each app keeps its own workspace, permissions and purchases/);
+  assert.match(section, /browse the products without signing in/);
+  assert.match(section, /href="\/account"/);
+  assert.doesNotMatch(section, /Coming next|Google|Apple|GitHub|not available/);
   assert.match(section, /\/3873\/lazyingart-platform-tools-shared-account.html/);
   assert.doesNotMatch(section, /href="\/api\/|<form|<button|claim now|automatic access/i);
 });
@@ -72,7 +72,11 @@ test('privacy distinguishes optional sessions from anonymous browsing', () => {
 test('local assets, anchors and canonical routes exist', () => {
   for (const file of readdirSync(root).filter(f => f.endsWith('.html'))) {
     const text = readFileSync(root + file, 'utf8');
-    for (const [, path] of text.matchAll(/(?:src|href)="(\/(?!\/)[^"#?]*)"/g)) assert.ok(existsSync(root + (path === '/' ? 'index.html' : path.slice(1))), path);
+    for (const [, path] of text.matchAll(/(?:src|href)="(\/(?!\/)[^"#?]*)"/g)) {
+      if (path === '/account') {
+        assert.match(readFileSync(new URL('../server/http.py', import.meta.url), 'utf8'), /\('\/account',AccountPage\)/);
+      } else assert.ok(existsSync(root + (path === '/' ? 'index.html' : path.slice(1))), path);
+    }
   }
   for (const [, id] of html.matchAll(/href="#([^"]+)"/g)) assert.ok(html.includes(`id="${id}"`));
   assert.ok(html.includes('rel="canonical" href="https://platform.lazying.art/"'));

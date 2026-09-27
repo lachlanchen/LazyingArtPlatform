@@ -42,13 +42,13 @@ node --test
 
 ## 状态与范围
 
-首个静态版本，目标地址为 https://platform.lazying.art/。只部署 public/。不包含账户数据库、支付密钥、追踪脚本或公开管理后台。支付管理仍使用现有 Stripe 流程。托管服务与购买网站各有其条款；本项目不保证收入。
+https://platform.lazying.art/ 的产品页面保持静态，无需账户即可浏览。公开文件仅来自 `public/`；独立账户服务的配置与加密会话数据库保持私有。不包含支付密钥、追踪脚本或公开管理后台。购买仍使用现有 Stripe 与应用商店流程。
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
 ## 账户集成
 
-EchoMind 链接到现有聊天网站与原生应用。`server/` 中的账户适配器已做本地测试，但统一登录尚未部署。登录提供商与 Coin 私人数据读取仍需各服务负责人完成线上验收。
+`server/` 通过用户名或邮箱加密码连接 EchoMind 的共享账户服务。此共享登录流程尚未启用 Google、Apple 或 GitHub。各应用保留独立的工作区和购买记录；Coin 读取需要单独同意与验收。已验证的发布状态见账户适配器文档。
 
 [docs/account-adapter.md](../docs/account-adapter.md)
 

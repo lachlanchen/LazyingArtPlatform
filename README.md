@@ -42,13 +42,13 @@ node --test
 
 ## Status and scope
 
-Initial static release; the target address is https://platform.lazying.art/. Deploy only public/. No account database, payment keys, tracking scripts or public admin. The existing Stripe workflow remains authoritative. Hosting and purchase destinations have their own terms; this is not an income guarantee.
+The product pages at https://platform.lazying.art/ remain static and need no account. Serve only `public/` as public files; the isolated account service keeps its configuration and encrypted session database private. No payment keys, tracking scripts or public admin. Existing Stripe and app-store purchase flows remain authoritative.
 
 [docs/integration.md](docs/integration.md) · [docs/assets.md](docs/assets.md)
 
 ## Account integration
 
-EchoMind links to its existing chat and native apps. `server/` contains a locally tested account adapter, not deployed unified login. Provider readiness and private Coin reads await the owning services’ live acceptance.
+`server/` connects the hub to EchoMind’s shared account service using username or email and password. Google, Apple and GitHub are not enabled for this shared flow. Each app keeps its own workspace and purchases; Coin reads require separate consent and qualification. See the adapter notes for verified release status.
 
 [docs/account-adapter.md](docs/account-adapter.md)
 

@@ -1,8 +1,9 @@
 # Integration boundaries
 
-The first release connects existing purchase paths instead of creating another
-payment system. It is a customer hub, not a claim that shared account access or
-order synchronization already works.
+The hub connects existing purchase paths instead of creating another payment
+system. Optional shared sign-in is a separate service; its qualified release
+status is in [account-adapter.md](account-adapter.md). It does not synchronize
+orders, app workspaces or purchase entitlements.
 
 | Journey | Authoritative destination |
 | --- | --- |
@@ -14,7 +15,8 @@ order synchronization already works.
 | Coin community | coin.lazying.art; independent of purchases |
 
 No Stripe key, unrestricted app token, wallet signer or customer data is needed
-to serve this release. Do not copy sibling .env files. Existing app prices,
+to serve the public product pages. The optional account consumer has its own
+scoped credential and private encrypted session state. Do not copy sibling .env files. Existing app prices,
 purchase models and checkout terms remain with their owners. In particular,
 Google L & N's free download is not a free paid-feature entitlement.
 
@@ -23,11 +25,13 @@ list is empty; the drafted community pool is not a claimable offer. No purchase,
 install, review, star, referral or public post earns tokens through this hub.
 Coin quantities and grants are not sales or dollar revenue.
 
-Future account, order and Coin reads need separate, audience-scoped contracts
-and live acceptance. Do not forward Coin's legacy session to this platform.
+Account, order and Coin reads need separate, audience-scoped contracts
+and live acceptance. Profile login does not grant Coin consent. Do not forward Coin's legacy session to this platform.
 Admin requires proper server authorization; robots.txt is not access control.
 
 Deployment stays on the owner's selected server. Static assets need no new
 application process, database, paid builder, analytics service or tunnel to the
-workstation. TLS uses the existing ingress; server-specific configuration and
-rollback records remain private. Deploy only public/, never the repository.
+workstation. The optional account service is isolated on the server and needs
+no workstation runtime. TLS uses the existing ingress; server-specific
+configuration and rollback records remain private. Serve only public/ as static
+files, never the repository or private account configuration.
