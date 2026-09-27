@@ -32,6 +32,17 @@ test('coin remains optional and inactive', () => {
   assert.match(html, /purchase does not earn an award/);
   assert.doesNotMatch(html, /connectWallet|eth_sendTransaction|claim now|guaranteed income/i);
 });
+test('shared account introduction distinguishes the framework from live EchoMind login', () => {
+  const section = html.match(/<section[^>]+id="account"[\s\S]*?<\/section>/)[0];
+  assert.match(section, /Coming next/);
+  assert.match(section, /EchoMind account/);
+  for (const provider of ['Google', 'Apple', 'GitHub', 'email']) assert.ok(section.includes(provider));
+  assert.match(section, /Shared sign-in is not available on this hub yet/);
+  assert.match(section, /each app’s existing login/);
+  assert.match(section, /href="https:\/\/chat\.lazying\.art\/login"/);
+  assert.match(section, /\/3873\/lazyingart-platform-tools-shared-account.html/);
+  assert.doesNotMatch(section, /href="\/api\/|<form|<button|claim now|automatic access/i);
+});
 test('company brand, prominent EchoMind actions and accessible motion', () => {
   assert.doesNotMatch(html, /Lachlan Chen|by Lachlan|I make small tools/);
   assert.ok((html.match(/https:\/\/chat\.lazying\.art\//g) || []).length >= 3);
