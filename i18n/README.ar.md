@@ -46,6 +46,16 @@ node --test
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
+## تكامل الحساب
+
+يرتبط EchoMind بالدردشة وتطبيقاته الحالية. يحتوي `server/` على محوّل حسابات اختُبر محلياً، وليس دخولاً موحداً منشوراً. جاهزية المزوّدين وقراءات Coin الخاصة تنتظر تحقق الخدمات المالكة فعلياً.
+
+[docs/account-adapter.md](../docs/account-adapter.md)
+
+```bash
+python -m pytest server/tests -q
+```
+
 ## الاستشهاد
 
 بيانات الاستشهاد بالمستودع: [CITATION.cff](../CITATION.cff).
@@ -58,4 +68,3 @@ node --test
   url = {https://github.com/lachlanchen/LazyingArtPlatform}
 }
 ```
-

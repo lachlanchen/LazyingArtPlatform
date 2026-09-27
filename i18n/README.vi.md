@@ -46,6 +46,16 @@ Bản tĩnh đầu tiên; địa chỉ dự kiến: https://platform.lazying.art
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
+## Tích hợp tài khoản
+
+EchoMind liên kết tới chat và ứng dụng gốc hiện có. `server/` chứa bộ kết nối đã kiểm thử cục bộ, chưa triển khai đăng nhập thống nhất. Nhà cung cấp và dữ liệu Coin riêng cần dịch vụ chủ quản xác nhận thực tế.
+
+[docs/account-adapter.md](../docs/account-adapter.md)
+
+```bash
+python -m pytest server/tests -q
+```
+
 ## Trích dẫn
 
 Siêu dữ liệu trích dẫn kho mã: [CITATION.cff](../CITATION.cff).
@@ -58,4 +68,3 @@ Siêu dữ liệu trích dẫn kho mã: [CITATION.cff](../CITATION.cff).
   url = {https://github.com/lachlanchen/LazyingArtPlatform}
 }
 ```
-

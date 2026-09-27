@@ -46,6 +46,16 @@ node --test
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
+## Интеграция аккаунтов
+
+EchoMind ведёт к существующему чату и нативным приложениям. Адаптер в `server/` протестирован локально, но единый вход ещё не развёрнут. Провайдеры и приватное чтение Coin требуют проверки действующих сервисов их владельцами.
+
+[docs/account-adapter.md](../docs/account-adapter.md)
+
+```bash
+python -m pytest server/tests -q
+```
+
 ## Цитирование
 
 Метаданные для цитирования репозитория: [CITATION.cff](../CITATION.cff).
@@ -58,4 +68,3 @@ node --test
   url = {https://github.com/lachlanchen/LazyingArtPlatform}
 }
 ```
-

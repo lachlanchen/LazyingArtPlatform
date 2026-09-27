@@ -46,6 +46,16 @@ node --test
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
+## 账户集成
+
+EchoMind 链接到现有聊天网站与原生应用。`server/` 中的账户适配器已做本地测试，但统一登录尚未部署。登录提供商与 Coin 私人数据读取仍需各服务负责人完成线上验收。
+
+[docs/account-adapter.md](../docs/account-adapter.md)
+
+```bash
+python -m pytest server/tests -q
+```
+
 ## 引用
 
 仓库引用信息： [CITATION.cff](../CITATION.cff).
@@ -58,4 +68,3 @@ node --test
   url = {https://github.com/lachlanchen/LazyingArtPlatform}
 }
 ```
-

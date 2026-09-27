@@ -46,6 +46,16 @@ Initial static release; the target address is https://platform.lazying.art/. Dep
 
 [docs/integration.md](docs/integration.md) · [docs/assets.md](docs/assets.md)
 
+## Account integration
+
+EchoMind links to its existing chat and native apps. `server/` contains a locally tested account adapter, not deployed unified login. Provider readiness and private Coin reads await the owning services’ live acceptance.
+
+[docs/account-adapter.md](docs/account-adapter.md)
+
+```bash
+python -m pytest server/tests -q
+```
+
 ## Citation
 
 Repository citation metadata: [CITATION.cff](CITATION.cff).
@@ -58,4 +68,3 @@ Repository citation metadata: [CITATION.cff](CITATION.cff).
   url = {https://github.com/lachlanchen/LazyingArtPlatform}
 }
 ```
-

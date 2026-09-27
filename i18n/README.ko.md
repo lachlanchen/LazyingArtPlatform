@@ -46,6 +46,16 @@ node --test
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
+## 계정 통합
+
+EchoMind는 기존 채팅과 네이티브 앱으로 연결됩니다. `server/`의 계정 연동 코드는 로컬 테스트 단계이며 통합 로그인은 배포되지 않았습니다. 로그인 제공자와 개인 Coin 조회는 담당 서비스의 실제 검증이 필요합니다.
+
+[docs/account-adapter.md](../docs/account-adapter.md)
+
+```bash
+python -m pytest server/tests -q
+```
+
 ## 인용
 
 저장소 인용 정보: [CITATION.cff](../CITATION.cff).
@@ -58,4 +68,3 @@ node --test
   url = {https://github.com/lachlanchen/LazyingArtPlatform}
 }
 ```
-

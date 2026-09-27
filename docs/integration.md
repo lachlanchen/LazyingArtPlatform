@@ -8,6 +8,7 @@ order synchronization already works.
 | --- | --- |
 | L & N native app | Apple App Store; Google Play |
 | Bunko native reader | Apple App Store including Mac; no unpublished Play link |
+| EchoMind | Its existing chat.lazying.art account flow, public Apple listing and Google Play listing |
 | Notebook / panda / pendant | Figurine's product and option pages at buy.lazying.art, followed by its existing Stripe Payment Link |
 | Payment changes, fulfillment and refunds | Existing Stripe/operator workflow, not a new public administrator endpoint |
 | Coin community | coin.lazying.art; independent of purchases |

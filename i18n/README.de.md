@@ -46,6 +46,16 @@ Erste statische Version; geplante Adresse: https://platform.lazying.art/. Nur pu
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
+## Kontenintegration
+
+EchoMind verlinkt seinen bestehenden Chat und seine nativen Apps. `server/` enthält einen lokal getesteten Adapter, keine bereitgestellte einheitliche Anmeldung. Anbieter und private Coin-Abfragen benötigen noch die reale Freigabe ihrer Dienste.
+
+[docs/account-adapter.md](../docs/account-adapter.md)
+
+```bash
+python -m pytest server/tests -q
+```
+
 ## Zitieren
 
 Zitationsmetadaten des Repositorys: [CITATION.cff](../CITATION.cff).
@@ -58,4 +68,3 @@ Zitationsmetadaten des Repositorys: [CITATION.cff](../CITATION.cff).
   url = {https://github.com/lachlanchen/LazyingArtPlatform}
 }
 ```
-

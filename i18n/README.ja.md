@@ -46,6 +46,16 @@ node --test
 
 [docs/integration.md](../docs/integration.md) · [docs/assets.md](../docs/assets.md)
 
+## アカウント連携
+
+EchoMind は既存のチャットとネイティブアプリにつながります。`server/` のアカウント連携コードはローカルテスト済みですが、統合ログインは未公開です。認証プロバイダーと Coin の個人情報読み取りは各サービスの実環境での確認が必要です。
+
+[docs/account-adapter.md](../docs/account-adapter.md)
+
+```bash
+python -m pytest server/tests -q
+```
+
 ## 引用
 
 リポジトリの引用情報： [CITATION.cff](../CITATION.cff).
@@ -58,4 +68,3 @@ node --test
   url = {https://github.com/lachlanchen/LazyingArtPlatform}
 }
 ```
-
