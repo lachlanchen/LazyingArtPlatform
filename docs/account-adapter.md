@@ -1,10 +1,12 @@
 # Shared account and personal dashboard
 
-Release qualification is in progress. The isolated service and exact HTTPS
-routes are deployed, but the homepage sign-in entry is held until a real browser
-registration, callback, dashboard and logout pass. Password discovery is verified;
-an issuer-side browser form-policy failure is being resolved by its owner.
-Coin reads remain disabled on Platform.
+Qualified September 27, 2026: real browser registration, password login, the
+actual Platform callback, dashboard, cancellation, service-restart session
+recovery and logout pass through the public HTTPS origin. Separately consented
+Coin reads also pass: profile-only sessions cannot read, cancelling keeps the
+prior session, and withdrawing consent stops the read without signing out.
+The live unmapped response is `link_required` with null quantities, never zero.
+Account linking and mapped wallet balances are not qualified by these tests.
 
 The public hub remains available without signing in. EchoMind owns the shared
 account and its Google, Apple, GitHub and email flows. This repository owns only
@@ -47,9 +49,12 @@ of synchronized workspaces, purchases, EchoMind access or credits.
    restart recovery and a synthetic callback log-leak check pass.
 5. Qualify the real provider callbacks, cancellation, logout, revocation and
    outages through the exact HTTPS origin. Only then expose Sign in on the hub
-   and publish the prepared entry. Privacy already explains optional sessions.
+   and publish the prepared entry. These browser checks now pass. Privacy explains
+   optional sessions and separately consented Coin reads.
 6. Separately qualify Coin delegation before showing balances or grants. Never
    send a Platform-audience token to Coin or trust a caller-supplied subject.
+   Unmapped read/withdrawal now pass live; this does not qualify wallet linking,
+   real balances, grants, purchases or distribution.
 
 The central contract is custom OAuth code/profile, not OIDC. No JWT/JWKS or
 provider-hint shortcut is assumed. Central shows the available provider buttons;
@@ -74,8 +79,8 @@ isolated service environment; do not modify another project's environment.
 [Coin summary v1](https://github.com/lachlanchen/LazyingArtCoin/blob/65739f4fd2cf26fafa0811428ad75def0a6418f8/docs/integrations/COIN-SUMMARY-V1.md).
 It is wired into the HTTP application only when explicitly enabled by the
 private runtime. Central has accepted the `platform-coin-read-v1` contract;
-the issuer's delegation is deployed, while Platform keeps the downstream read
-disabled until its own real session and the resource are jointly qualified. The consumer
+the issuer's delegation and Platform's actual consent/session/resource path are
+jointly qualified for unmapped accounts. The consumer
 does not invent an issuer endpoint or mint a token.
 
 Ordinary login asks only for `profile`. A separate explicit consent request asks
@@ -97,8 +102,14 @@ The `ReadCredential` type is a defensive envelope, not proof that authorization
 exists. Only the central adapter may populate it from the accepted exchange.
 Acquisition and response are bound to the app-local session. Authoritative
 checks before and after I/O discard responses after logout, account changes or
-consent revocation. Real consent/revocation and public resource-header forwarding
-still require production qualification. Personal reads are not cached.
+consent revocation. Real consent, withdrawal and the existing TLS resource route
+were exercised from the deployed Platform consumer. Personal reads are not cached.
+
+On a co-located edge, the service may need a service-only hostname mapping to
+reach the existing TLS ingress rather than its own public IP. This does not
+change the resource URL, Host, TLS SNI, certificate verification, token header
+or exact route. Do not change system-wide DNS, shared ingress or firewall rules
+to solve this consumer-local transport issue.
 
 ## Private runtime
 
@@ -138,5 +149,9 @@ The complete local flow test exercises real Platform handlers and encrypted
 state with a synthetic issuer/resource: sign-in, separate consent, LAC summary,
 callback replay, cancellation and logout. Browser layout review covers sign-in,
 disabled, permission and populated states at 320, 390 and 1280 pixels. These
-prove source/layout behavior, not a production provider login or customer funds.
-No sample quantities appear in the public product hub.
+prove source/layout behavior, not customer funds. The separate live browser
+qualification uses a disposable synthetic account and contains no customer
+content. No sample quantities appear in the public product hub. Google, Apple
+and GitHub, mapped Coin balances and natural delegated-token expiry are not
+claimed as live-tested capabilities. Enabling the service at boot is distinct
+from a full-server reboot test.

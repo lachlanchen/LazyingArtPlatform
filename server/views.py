@@ -17,7 +17,7 @@ def page(content):
 
 
 def sign_in(providers, csrf, *, message=''):
-    labels = {'password':'Email','google':'Google','apple':'Apple','github':'GitHub'}
+    labels = {'password':'Username or email and password','google':'Google','apple':'Apple','github':'GitHub'}
     content = '<section class="account-card"><p class="eyebrow">Your LazyingArt account</p><h1>A familiar way in.</h1>'
     if message:
         content += '<p role="status">'+escape(message)+'</p>'

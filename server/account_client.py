@@ -2,8 +2,8 @@
 # Platform consumer; no Coin ledger or provider authority.
 """Backend client for LazyingArt account contract v1 (OAuth, not OIDC).
 
-Not enabled on the public hub yet. Configuration and browser
-callback registration must be supplied by the central account owner. No
+Configuration and browser callback registration are supplied by the central
+account owner, not inferred by this consumer. No
 provider password, ID token, wallet authority or credit grant is handled here.
 """
 

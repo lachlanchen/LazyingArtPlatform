@@ -1,7 +1,7 @@
-"""Staged Coin summary consumer; no issuer exchange or production wiring.
+"""Read-only consumer for Coin's qualified summary-v1 contract.
 
-Implements Coin's source-tested summary-v1 contract (40c78b3). Only a future
-qualified central delegation adapter may supply ReadCredential. Ordinary
+Only the separately consented central delegation adapter may supply
+ReadCredential. Ordinary
 Platform profile credentials must never be passed to this client.
 """
 import asyncio
@@ -215,7 +215,7 @@ def render_summary(data, identity):
     out = ['<section aria-label="Your LazyingArt coins"><h2>Your LazyingArt coins</h2>']
     link = data['account_link']['state']
     if link != 'linked':
-        message = 'Connect your Coin profile to see its summary.' if link == 'link_required' else 'Your Coin profile has been deleted.'
+        message = 'Your account is not linked to a Coin profile yet.' if link == 'link_required' else 'Your Coin profile has been deleted.'
         out.append('<p>'+message+'</p>')
     else:
         chain = data['on_chain']

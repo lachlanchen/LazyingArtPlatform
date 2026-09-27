@@ -8,8 +8,9 @@ The product pages are buildless static HTML/CSS served by existing server
 ingress. No payment credentials, wallet keys, analytics tracker or public admin
 belongs in this release. The owner's September 27 follow-up authorizes the
 isolated account consumer in server/, with private encrypted session state.
-Central registration and deployment are qualified; Platform's public sign-in
-launch still requires its own real browser callback/session acceptance.
+Registration, Platform callback/session and separately consented unmapped Coin
+reads passed real-browser acceptance on September 27. Preserve that acceptance
+gate for future auth changes; mapped balances and account linking are not qualified.
 EchoMind owns identity/providers; Coin
 owns a separately consented scoped read API. Do not create a competing issuer.
 Native purchases go to the platform stores. Handmade orders go through the

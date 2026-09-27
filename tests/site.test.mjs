@@ -66,7 +66,10 @@ test('privacy distinguishes optional sessions from anonymous browsing', () => {
   assert.match(privacy, /up to 30 days/);
   assert.match(privacy, /encrypted on our server/);
   assert.match(privacy, /does not sign you out of every other app/);
-  assert.match(privacy, /LAC summaries are not connected/);
+  assert.match(privacy, /separate read-only permission/);
+  assert.match(privacy, /Unlinked profiles have no balance to show/);
+  assert.match(privacy, /Personal summaries are not cached/);
+  assert.match(privacy, /stop sharing in your shared account settings/);
   assert.doesNotMatch(privacy, /does not.*ask for a login/);
 });
 test('local assets, anchors and canonical routes exist', () => {

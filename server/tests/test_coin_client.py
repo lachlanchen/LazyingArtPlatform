@@ -129,6 +129,9 @@ def test_unlinked_and_deleted_never_show_fake_zero(state):
     data['grants']=dict(state=state,items=None,totals=None,total_count=None,recent_limit=20,has_more=None)
     rendered=render_summary(data,IDENTITY)
     assert '0 LAC' not in rendered and 'Wallet balance:' not in rendered
+    if state == 'link_required':
+        assert 'Your account is not linked to a Coin profile yet.' in rendered
+        assert 'Connect your Coin profile' not in rendered
     data['on_chain']['lac_units']='0'
     with pytest.raises(CoinError): validate_summary(data,IDENTITY)
 
