@@ -31,6 +31,7 @@ class DisabledTests(AsyncHTTPTestCase):
         assert response.code==200 and b'not available here yet' in response.body
         assert b'<form' not in response.body and b'0 LAC' not in response.body
         assert response.headers['X-Robots-Tag']=='noindex, nofollow'
+        assert "form-action 'self';" in response.headers['Content-Security-Policy']
 
 
 class AdapterTests(AsyncHTTPTestCase):
@@ -63,6 +64,8 @@ class AdapterTests(AsyncHTTPTestCase):
         assert 'type="password"' not in text and 'provider/' not in text
         assert '/api/account/start' in text
         assert self.request('/api/account/start').code == 405
+        assert "form-action 'self' "+ISSUER+";" in response.headers['Content-Security-Policy']
+        assert response.headers['Referrer-Policy']=='same-origin'
 
     def test_start_is_same_origin_and_csrf_protected(self):
         assert self.request('/api/account/start',method='POST',body='',headers={'Origin':ORIGIN}).code == 403
@@ -89,6 +92,7 @@ class AdapterTests(AsyncHTTPTestCase):
         query=urlencode(dict(iss=ISSUER,state='a'*48,code='c'*48))
         response=self.request('/api/account/callback?'+query,headers={'Cookie':'__Host-lap_flow='+'b'*48})
         assert response.code==303 and response.headers['Location']=='/account'
+        assert response.headers['Referrer-Policy']=='no-referrer'
         cookies=response.headers.get_list('Set-Cookie')
         cookie=next(c for c in cookies if c.startswith('__Host-lap_session='))
         assert 'Secure' in cookie and 'HttpOnly' in cookie and 'SameSite=Strict' in cookie and 'Path=/' in cookie

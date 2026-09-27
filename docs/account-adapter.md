@@ -115,6 +115,13 @@ route allowlist. Never serve the repository root or private runtime configuratio
 Pages and APIs use no-store/noindex, host-only Secure/HttpOnly cookies, strict
 Host/Origin and CSRF checks, a script-free CSP and escaped display text. Request
 access logs are disabled to avoid storing callback codes or personal identifiers.
+The form policy allows only this app and the pinned issuer, including the
+post-submit redirect. Browsers can enforce `form-action` on that redirect too;
+see [MDN's form-action reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/form-action).
+Account pages use a same-origin referrer policy so browser form POSTs preserve
+their Origin header; callback/API responses retain no-referrer. The isolated
+browser test clicks the actual sign-in form through real Platform handlers and
+reaches a synthetic external issuer without weakening the Origin/CSRF checks.
 
 The complete local flow test exercises real Platform handlers and encrypted
 state with a synthetic issuer/resource: sign-in, separate consent, LAC summary,

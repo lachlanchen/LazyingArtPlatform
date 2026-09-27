@@ -38,15 +38,21 @@ def application(service=None, *, origin='https://platform.lazying.art', cookie_s
     if service and (not cookie_secret or service.client.config.redirect_uri != origin + '/api/account/callback'):
         raise ValueError('qualified_registration_required')
     budget = request_budget if request_budget is not None else RequestBudget()
+    # Chromium applies form-action to a POST's redirect chain too. Keep it
+    # restricted to this app plus the pinned central issuer, not all HTTPS.
+    form_targets = "'self'" + (' ' + service.client.config.issuer if service else '')
 
     class Base(tornado.web.RequestHandler):
         def set_default_headers(self):
             self.set_header('Cache-Control', 'no-store')
             self.set_header('X-Robots-Tag', 'noindex, nofollow')
-            self.set_header('Referrer-Policy', 'no-referrer')
+            # no-referrer makes Chromium's form POST Origin "null". Preserve
+            # same-origin form checks without exposing referrers to the issuer.
+            # Callback responses keep no-referrer so code-bearing URLs stay out.
+            self.set_header('Referrer-Policy', 'same-origin' if self.request.path == '/account' else 'no-referrer')
             self.set_header('X-Content-Type-Options', 'nosniff')
             self.set_header('X-Frame-Options', 'DENY')
-            self.set_header('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
+            self.set_header('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'self'; form-action " + form_targets + "; base-uri 'none'; frame-ancestors 'none'")
 
         def prepare(self):
             if self.request.host != urlsplit(origin).netloc:
