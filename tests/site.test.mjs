@@ -14,6 +14,14 @@ test('physical selection goes through the existing shop', () => {
   for (const slug of ['notebook', 'panda', 'pendant']) assert.ok(html.includes(`https://buy.lazying.art/#${slug}`));
   assert.doesNotMatch(html, /buy\.stripe\.com/);
 });
+test('L&N offers an ungated sample while retaining native purchase actions', () => {
+  const card = html.match(/<article class="app-card speech">[\s\S]*?<\/article>/)[0];
+  assert.equal((card.match(/https:\/\/l-and-n\.lazying\.art\/lessons\/light-vs-night\//g) || []).length, 1);
+  assert.match(card, /Try the free light \/ night audio lesson/);
+  assert.match(card, /id6808872450/);
+  assert.match(card, /art\.lazying\.landn/);
+  assert.doesNotMatch(card, /\/account|buy\.stripe\.com|<form/);
+});
 test('new product introductions retain their guides and qualified Mac release', () => {
   const section = html.match(/<section[^>]+id="explore"[\s\S]*?<\/section>/)[0];
   for (const id of ['3862', '3864', '3866']) assert.ok(section.includes(`/computer_internet/${id}/`));
