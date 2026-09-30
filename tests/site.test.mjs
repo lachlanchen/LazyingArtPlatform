@@ -14,16 +14,21 @@ test('physical selection goes through the existing shop', () => {
   for (const slug of ['notebook', 'panda', 'pendant']) assert.ok(html.includes(`https://buy.lazying.art/#${slug}`));
   assert.doesNotMatch(html, /buy\.stripe\.com/);
 });
-test('new products lead to useful introductions without claiming store approval', () => {
+test('new product introductions retain their guides and qualified Mac release', () => {
   const section = html.match(/<section[^>]+id="explore"[\s\S]*?<\/section>/)[0];
   for (const id of ['3862', '3864', '3866']) assert.ok(section.includes(`/computer_internet/${id}/`));
-  assert.match(section, /testing or review/);
   assert.doesNotMatch(section, /apps\.apple\.com|play\.google\.com/);
+  const mac = html.match(/<article[^>]+id="onlyideas"[\s\S]*?<\/article>/)[0];
+  assert.match(mac, /id6816392935\?platform=mac/);
+  assert.match(mac, /Mac App Store <span>Free/);
+  assert.match(mac, /iPhone and Android editions are still in review/);
+  assert.match(mac, /paid plans are not open/);
   for (const id of ['3849', '3853', '3857', '3867']) assert.ok(html.includes(`/${id}/`));
 });
 test('EchoMind uses official released stores and the existing first-party chat', () => {
   for (const route of ['https://chat.lazying.art/', 'id6793615455', 'art.lazying.echomind']) assert.ok(html.includes(route));
   assert.match(html, /iPhone\/iPad: US\$0\.99/);
+  assert.match(html, /full EchoMind access needs an invitation/);
   assert.doesNotMatch(html, /Continue with (Google|Apple|GitHub)|unified login is live/i);
 });
 test('coin remains optional and inactive', () => {

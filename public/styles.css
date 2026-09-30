@@ -57,6 +57,8 @@ h1 { font-size: clamp(3rem, 6.8vw, 5.6rem); line-height: 1.04; letter-spacing: -
 .app-card { padding: 40px; border-radius: 30px; display: flex; flex-direction: column; min-width: 0; border: 1px solid #ffffffa8; transition: transform .35s, box-shadow .35s; }
 .speech { background: radial-gradient(ellipse at 15% 0%, #cde8ff, transparent 65%), #eaf3ff; }
 .reader { background: radial-gradient(ellipse at 85% 0%, #ded5ff, transparent 65%), #f0edff; }
+.research { grid-column: 1 / -1; background: radial-gradient(ellipse at 100% 0%, #c3eafa, transparent 60%), #eaf8fa; }
+.research > p:not(.small) { max-width: 760px; }
 .app-top { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 32px; }
 .app-top img { width: 90px; border-radius: 23px; box-shadow: 0 12px 30px #22245424; transition: transform .4s; }
 .tag { font-size: .875rem; line-height: 1.5; max-width: 150px; text-align: right; color: #444d69; }
