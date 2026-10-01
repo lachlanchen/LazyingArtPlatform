@@ -28,7 +28,7 @@ test('new product introductions retain their guides and qualified Mac release', 
   assert.doesNotMatch(section, /apps\.apple\.com|play\.google\.com/);
   const mac = html.match(/<article[^>]+id="onlyideas"[\s\S]*?<\/article>/)[0];
   assert.match(mac, /id6816392935\?platform=mac/);
-  assert.match(mac, /Mac App Store <span>Free/);
+  assert.match(mac, /Mac App Store <span>US\$0\.99/);
   assert.match(mac, /iPhone and Android editions are still in review/);
   assert.match(mac, /paid plans are not open/);
   for (const id of ['3849', '3853', '3857', '3867']) assert.ok(html.includes(`/${id}/`));
