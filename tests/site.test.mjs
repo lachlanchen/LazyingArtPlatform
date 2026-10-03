@@ -21,6 +21,14 @@ test('L&N offers an ungated sample while retaining native purchase actions', () 
   assert.match(card, /id6808872450/);
   assert.match(card, /art\.lazying\.landn/);
   assert.doesNotMatch(card, /\/account|buy\.stripe\.com|<form/);
+  assert.match(card, /id6808872450\?platform=mac/);
+  assert.match(card, /Mac App Store <span>US\$0\.99/);
+});
+test('Bunko describes the released aligned Watch excerpts without implying full books on Watch', () => {
+  const card = html.match(/<article class="app-card reader" id="bunko">[\s\S]*?<\/article>/)[0];
+  assert.match(card, /Send an excerpt from iPhone to Apple Watch/);
+  assert.match(card, /ruby readings and translations aligned sentence by sentence/);
+  assert.doesNotMatch(card, /entire library on.*Watch|1\.0\.10.*Mac/i);
 });
 test('new product introductions retain their guides and qualified Mac release', () => {
   const section = html.match(/<section[^>]+id="explore"[\s\S]*?<\/section>/)[0];
