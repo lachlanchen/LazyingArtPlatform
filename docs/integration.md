@@ -8,7 +8,12 @@ orders, app workspaces or purchase entitlements.
 | Journey | Authoritative destination |
 | --- | --- |
 | L & N native app | Apple App Store; Google Play |
-| Bunko native reader | Apple App Store including Mac; no unpublished Play link |
+| Bunko native reader | Apple App Store including Mac; public Google Play listing |
+| AiMemo | Apple App Store and Google Play; Mac remains in review |
+| OnlyIdeas | Mac App Store and Google Play; iPhone remains in review |
+| SHI | Apple App Store and Google Play; Chapter I only |
+| LazyOracle | Google Play; Apple remains in review |
+| LightMind Agent | Its existing Apple/Google listings; separate LightMind Tech Limited brand |
 | EchoMind | Its existing chat.lazying.art account flow, public Apple listing and Google Play listing |
 | Notebook / panda / pendant | Figurine's product and option pages at buy.lazying.art, followed by its existing Stripe Payment Link |
 | Payment changes, fulfillment and refunds | Existing Stripe/operator workflow, not a new public administrator endpoint |
@@ -19,6 +24,8 @@ to serve the public product pages. The optional account consumer has its own
 scoped credential and private encrypted session state. Do not copy sibling .env files. Existing app prices,
 purchase models and checkout terms remain with their owners. In particular,
 Google L & N's free download is not a free paid-feature entitlement.
+Its separately listed Android Pro edition includes all word pairs. The current
+public listing check is in [store-availability-2026-10-03.md](store-availability-2026-10-03.md).
 
 Coin owns wallet proof, awards and receipts. The inspected public campaign
 list is empty; the drafted community pool is not a claimable offer. No purchase,

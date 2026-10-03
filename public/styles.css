@@ -45,7 +45,7 @@ h1 { font-size: clamp(3rem, 6.8vw, 5.6rem); line-height: 1.04; letter-spacing: -
 .button.outline { background: transparent; color: var(--accent); }
 .button.outline:hover { background: #0062cf0c; }
 .button:active { transform: translateY(0); }
-.app-shelf { display: flex; justify-content: center; gap: 42px; margin-top: 44px; }
+.app-shelf { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px 42px; margin-top: 44px; }
 .app-shelf a { display: grid; justify-items: center; gap: 12px; font-size: .875rem; font-weight: 600; text-decoration: none; }
 .app-shelf img { width: 82px; border-radius: 21px; box-shadow: 0 12px 26px #16194c1c; transition: transform .35s; }
 .app-shelf a:hover img { transform: translateY(-7px) rotate(-3deg); }
@@ -57,7 +57,11 @@ h1 { font-size: clamp(3rem, 6.8vw, 5.6rem); line-height: 1.04; letter-spacing: -
 .app-card { padding: 40px; border-radius: 30px; display: flex; flex-direction: column; min-width: 0; border: 1px solid #ffffffa8; transition: transform .35s, box-shadow .35s; }
 .speech { background: radial-gradient(ellipse at 15% 0%, #cde8ff, transparent 65%), #eaf3ff; }
 .reader { background: radial-gradient(ellipse at 85% 0%, #ded5ff, transparent 65%), #f0edff; }
-.research { grid-column: 1 / -1; background: radial-gradient(ellipse at 100% 0%, #c3eafa, transparent 60%), #eaf8fa; }
+.research { background: radial-gradient(ellipse at 100% 0%, #c3eafa, transparent 60%), #eaf8fa; }
+.notes { background: radial-gradient(ellipse at 15% 0%, #fbe6b2, transparent 60%), #fff8e8; }
+.strategy { background: radial-gradient(ellipse at 85% 0%, #e7cbae, transparent 60%), #f6ede5; }
+.reflection { background: radial-gradient(ellipse at 15% 0%, #f4cde5, transparent 60%), #fcf0f8; }
+.companion { grid-column: 1 / -1; background: radial-gradient(ellipse at 100% 0%, #c8edda, transparent 60%), #eef9f3; }
 .research > p:not(.small) { max-width: 760px; }
 .app-top { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 32px; }
 .app-top img { width: 90px; border-radius: 23px; box-shadow: 0 12px 30px #22245424; transition: transform .4s; }

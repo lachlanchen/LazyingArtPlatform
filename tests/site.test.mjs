@@ -5,17 +5,17 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../public/', import.meta.url));
 const html = readFileSync(root + 'index.html', 'utf8');
 test('official native-store routes and honest purchase modes', () => {
-  for (const id of ['id6808872450', 'id6815137919', 'art.lazying.landn']) assert.ok(html.includes(id));
-  assert.match(html, /free download with in-app purchases/);
+  for (const id of ['id6808872450', 'id6815137919', 'art.lazying.landn', 'art.lazying.bunko', 'art.lazying.landn.pro']) assert.ok(html.includes(id));
+  assert.match(html, /Android Pro is a separate paid edition/);
   assert.match(html, /US\$0\.99/);
-  assert.doesNotMatch(html, /art\.lazying\.bunko|testflight|internaltest|\.apk/);
+  assert.doesNotMatch(html, /testflight|internaltest|\.apk/);
 });
 test('physical selection goes through the existing shop', () => {
   for (const slug of ['notebook', 'panda', 'pendant']) assert.ok(html.includes(`https://buy.lazying.art/#${slug}`));
   assert.doesNotMatch(html, /buy\.stripe\.com/);
 });
 test('L&N offers an ungated sample while retaining native purchase actions', () => {
-  const card = html.match(/<article class="app-card speech">[\s\S]*?<\/article>/)[0];
+  const card = html.match(/<article class="app-card speech" id="landn">[\s\S]*?<\/article>/)[0];
   assert.equal((card.match(/https:\/\/l-and-n\.lazying\.art\/lessons\/light-vs-night\//g) || []).length, 1);
   assert.match(card, /Try the free light \/ night audio lesson/);
   assert.match(card, /id6808872450/);
@@ -29,9 +29,28 @@ test('new product introductions retain their guides and qualified Mac release', 
   const mac = html.match(/<article[^>]+id="onlyideas"[\s\S]*?<\/article>/)[0];
   assert.match(mac, /id6816392935\?platform=mac/);
   assert.match(mac, /Mac App Store <span>US\$0\.99/);
-  assert.match(mac, /iPhone and Android editions are still in review/);
+  assert.match(mac, /art\.onlyideas\.app/);
+  assert.match(mac, /iPhone edition remains in review/);
   assert.match(mac, /paid plans are not open/);
   for (const id of ['3849', '3853', '3857', '3867']) assert.ok(html.includes(`/${id}/`));
+});
+test('new live app cards expose only qualified platform routes', () => {
+  const cards = new Map([...html.matchAll(/<article class="app-card [^"]+" id="([^"]+)">([\s\S]*?)<\/article>/g)].map(m => [m[1], m[2]]));
+  assert.equal(cards.size, 7);
+  for (const [id, routes] of Object.entries({
+    aimemo: ['id6757573920', 'art.lazying.aimemo'],
+    shi: ['id6816377548', 'art.lazying.shi'],
+    lazyoracle: ['art.lazying.lazyoracle'],
+    lightmind: ['id6794785684', 'art.lightmind.mobile'],
+  })) for (const route of routes) assert.ok(cards.get(id).includes(route), `${id}: ${route}`);
+  assert.doesNotMatch(cards.get('onlyideas'), /href="https:\/\/apps\.apple\.com[^"?]*id6816392935"/);
+  assert.doesNotMatch(cards.get('aimemo'), /platform=mac/);
+  assert.doesNotMatch(cards.get('lazyoracle'), /apps\.apple\.com/);
+  assert.match(cards.get('aimemo'), /Account required/);
+  assert.match(cards.get('lightmind'), /LightMind Tech Limited, a separate company/);
+  assert.match(cards.get('shi'), /Chapter I/);
+  const css = readFileSync(root + 'styles.css', 'utf8');
+  assert.match(css, /\.app-shelf\s*\{[^}]*flex-wrap:\s*wrap/);
 });
 test('EchoMind uses official released stores and the existing first-party chat', () => {
   for (const route of ['https://chat.lazying.art/', 'id6793615455', 'art.lazying.echomind']) assert.ok(html.includes(route));
