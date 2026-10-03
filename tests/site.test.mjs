@@ -52,6 +52,12 @@ test('new live app cards expose only qualified platform routes', () => {
   const css = readFileSync(root + 'styles.css', 'utf8');
   assert.match(css, /\.app-shelf\s*\{[^}]*flex-wrap:\s*wrap/);
 });
+test('top app shelf includes every LazyingArt app once, including LazyOracle', () => {
+  const shelf = html.match(/<div class="app-shelf"[^>]*>([\s\S]*?)<\/div>/)[1];
+  const anchors = [...shelf.matchAll(/<a href="#([^"]+)">/g)].map(m => m[1]);
+  assert.deepEqual(anchors, ['landn', 'bunko', 'onlyideas', 'aimemo', 'shi', 'lazyoracle', 'chat']);
+  assert.match(shelf, /href="#lazyoracle"><img src="\/assets\/lazyoracle\.png"[^>]*><span>LazyOracle<\/span>/);
+});
 test('EchoMind uses official released stores and the existing first-party chat', () => {
   for (const route of ['https://chat.lazying.art/', 'id6793615455', 'art.lazying.echomind']) assert.ok(html.includes(route));
   assert.match(html, /iPhone\/iPad: US\$0\.99/);
