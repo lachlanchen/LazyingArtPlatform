@@ -45,9 +45,10 @@ h1 { font-size: clamp(3rem, 6.8vw, 5.6rem); line-height: 1.04; letter-spacing: -
 .button.outline { background: transparent; color: var(--accent); }
 .button.outline:hover { background: #0062cf0c; }
 .button:active { transform: translateY(0); }
-.app-shelf { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px 42px; margin-top: 44px; }
-.app-shelf a { display: grid; justify-items: center; gap: 12px; font-size: .875rem; font-weight: 600; text-decoration: none; }
-.app-shelf img { width: 82px; border-radius: 21px; box-shadow: 0 12px 26px #16194c1c; transition: transform .35s; }
+.app-shelf { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px 16px; width: min(100%, 520px); margin: 44px auto 0; }
+.app-shelf a { flex: 0 0 112px; display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 136px; padding: 14px 10px; border: 1px solid #1d1d1f12; border-radius: 22px; background: #ffffff80; font-size: .875rem; font-weight: 600; text-align: center; text-decoration: none; transition: background .2s; }
+.app-shelf a:hover { background: #fff; }
+.app-shelf img { width: 80px; height: 80px; flex-shrink: 0; border-radius: 21px; box-shadow: 0 8px 20px #16194c16; transition: transform .35s; }
 .app-shelf a:hover img { transform: translateY(-7px) rotate(-3deg); }
 .section { margin-bottom: 100px; }
 .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 30px; }
@@ -153,8 +154,9 @@ p { line-height: 1.65; }
   .intro { padding-top: 50px; padding-bottom: 58px; }
   .lede { font-size: 1.0625rem; max-width: 470px; }
   .desktop-break { display: none; }
-  .app-shelf { gap: 30px; margin-top: 34px; }
-  .app-shelf img { width: 72px; border-radius: 18px; }
+  .app-shelf { gap: 16px 12px; max-width: 360px; margin-top: 34px; }
+  .app-shelf a { flex-basis: 88px; min-height: 112px; padding: 12px 6px; gap: 10px; border-radius: 18px; font-size: .8125rem; }
+  .app-shelf img { width: 64px; height: 64px; border-radius: 17px; }
   .section { margin-bottom: 64px; }
   .section-heading { display: block; margin-bottom: 24px; }
   .section-heading p { margin-top: 18px; }

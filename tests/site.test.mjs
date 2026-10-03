@@ -57,6 +57,10 @@ test('top app shelf includes every LazyingArt app once, including LazyOracle', (
   const anchors = [...shelf.matchAll(/<a href="#([^"]+)">/g)].map(m => m[1]);
   assert.deepEqual(anchors, ['landn', 'bunko', 'onlyideas', 'aimemo', 'shi', 'lazyoracle', 'chat']);
   assert.match(shelf, /href="#lazyoracle"><img src="\/assets\/lazyoracle\.png"[^>]*><span>LazyOracle<\/span>/);
+  const css = readFileSync(root + 'styles.css', 'utf8');
+  assert.match(css, /\.app-shelf\s*\{[^}]*justify-content:\s*center[^}]*width:\s*min\(100%, 520px\)[^}]*margin:\s*44px auto 0/);
+  assert.match(css, /\.app-shelf a\s*\{[^}]*flex:\s*0 0 112px[^}]*align-items:\s*center/);
+  assert.match(css, /\.app-shelf a\s*\{[^}]*flex-basis:\s*88px/);
 });
 test('EchoMind uses official released stores and the existing first-party chat', () => {
   for (const route of ['https://chat.lazying.art/', 'id6793615455', 'art.lazying.echomind']) assert.ok(html.includes(route));
